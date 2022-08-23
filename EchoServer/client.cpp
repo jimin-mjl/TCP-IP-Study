@@ -1,3 +1,5 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <iostream>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -16,7 +18,7 @@ int RecvMsg(SOCKET* sock, char* buffer);
 
 // argc : 커맨드 라인으로 받을 인자의 수
 // argv : 인자 목록 (argv[0]은 실행한 커맨드로 받게 됨)
-int main(int argc, char* argv[])   
+int main(int argc, char* argv[])
 {
     if (argc != 3)  // 인자 제대로 받았는지 확인
     {
@@ -42,6 +44,9 @@ int main(int argc, char* argv[])
     {
         std::cout << "There is an error..." << std::endl;
     }
+
+    closesocket(sock);
+    WSACleanup();
 }
 
 void HandleError(const char* fname)
@@ -80,6 +85,7 @@ SOCKADDR_IN SetSocketAddr(const char* ip, const char* port)
 
     addr.sin_family = AF_INET;  // IPv4 체계
     addr.sin_addr.s_addr = inet_addr(ip);  // 문자열을 IPv4 주소로 변환해서 전달    
+    // InetPton(AF_INET, ip, &addr.sin_addr.s_addr);
     addr.sin_port = htons(atoi(port)); // port 번호 문자열을 정수로 변환해서 전달 
 
     return addr;
@@ -87,11 +93,11 @@ SOCKADDR_IN SetSocketAddr(const char* ip, const char* port)
 
 void ConnectSocket(SOCKET* sock, SOCKADDR_IN* addr)
 {
-    int result = connect(*sock, addr, sizeof(*addr));
+    int result = connect(*sock, (sockaddr*)addr, sizeof(*addr));
 
     if (result == SOCKET_ERROR)
     {
-        closesocket(&sock);
+        closesocket(*sock);
         HandleError("connect()");
     }
 }
@@ -99,7 +105,7 @@ void ConnectSocket(SOCKET* sock, SOCKADDR_IN* addr)
 int SendMsg(SOCKET* sock, const char* msg)
 {
     int result = send(*sock, msg, sizeof(msg), 0);
-    
+
     if (result == SOCKET_ERROR)
     {
         closesocket(*sock);
