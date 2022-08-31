@@ -81,10 +81,10 @@ SOCKET CreateSocket()
 
 SOCKADDR_IN SetSocketAddr(const char* ip, const char* port)
 {
-    SOCKADDR_IN addr = SOCKADDR_IN();  // SOCKADDR_IN 구조체 초기화
+    SOCKADDR_IN addr = {};  // SOCKADDR_IN 구조체 초기화 (sin_zero = 0으로 초기화)
 
     addr.sin_family = AF_INET;  // IPv4 체계
-    addr.sin_addr.s_addr = inet_addr(ip);  // 문자열을 IPv4 주소로 변환해서 전달    
+    addr.sin_addr.s_addr = inet_addr(ip);  // 문자열을 빅엔디안 방식의 정수로 변환해서 전달    
     // InetPton(AF_INET, ip, &addr.sin_addr.s_addr);
     addr.sin_port = htons(atoi(port)); // port 번호 문자열을 정수로 변환해서 전달 
 
